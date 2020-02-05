@@ -1,5 +1,6 @@
 package com.ahayes5.homework1.desktop;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.ahayes5.homework1.Homework;
