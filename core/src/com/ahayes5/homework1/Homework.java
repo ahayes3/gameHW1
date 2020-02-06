@@ -15,21 +15,26 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import java.util.Iterator;
 
 public class Homework extends ApplicationAdapter
 {
 	SpriteBatch batch;
 	Texture p40, bf109;
-	OrthographicCamera camera;
-	//Sprite player;
-	Circle bullet;
+	public static OrthographicCamera camera;
 	Music propeller;
-	Polygon playerPoly;
+	Polygon playerPoly,bf109poly;
 	ShapeRenderer debug;
+	Player player;
+	Array<Bullet> bullets;
+	Enemy enemy;
 
 	@Override
 	public void create()
 	{
+		bullets=new Array<Bullet>();
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false,500,800);
 
@@ -41,21 +46,21 @@ public class Homework extends ApplicationAdapter
 		bf109 = new Texture(Gdx.files.internal("bf109.png"));
 		propeller = Gdx.audio.newMusic(Gdx.files.internal("propeller.mp3"));
 
-//		playerCenter = new Vector2(Gdx.graphics.getWidth()/2f,Gdx.graphics.getHeight()/2f);
-//		player = new Sprite(p40);
-//		player.setSize(90,70);
-//		player.setPosition(200,20);
-
 		playerPoly=new Polygon();
-		System.out.println(playerPoly.getOriginX());
 		playerPoly.setOrigin(0,0);
-		System.out.println(playerPoly.getOriginX());
 		playerPoly.setVertices(new float[]{0,45,45,70,90,45,45,0});
 
-
+		player = new Player(p40,playerPoly,camera.viewportWidth,camera.viewportHeight);
 		propeller.setLooping(true);
 		propeller.setVolume(.5f);
 		propeller.play();
+
+		bf109poly=new Polygon();
+		bf109poly.setOrigin(0,0);
+		bf109poly.setVertices(new float[]{0,45,40,60,80,45,40,0});
+		enemy = new Enemy(bf109,bf109poly,1,100,
+				new Vector2(camera.viewportWidth,camera.viewportHeight),100
+				,new Vector2(80,60));
 	}
 
 	@Override
@@ -64,29 +69,37 @@ public class Homework extends ApplicationAdapter
 		Gdx.gl.glClearColor(.1f, .5f, .1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT))
-			playerPoly.translate(-175*Gdx.graphics.getDeltaTime(),0);
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-			playerPoly.translate(175*Gdx.graphics.getDeltaTime(),0);
-		if(Gdx.input.isKeyPressed(Input.Keys.UP))
-			playerPoly.translate(0,175*Gdx.graphics.getDeltaTime());
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
-			playerPoly.translate(0,-175*Gdx.graphics.getDeltaTime());
+		Array<Bullet> temp= player.move();
+		if(temp!=null)
+			bullets.addAll(temp);
 
-		if(playerPoly.getX() < 0)
-			playerPoly.setPosition(0,playerPoly.getY());
-		if(playerPoly.getX()+playerPoly.getVertices()[4] > camera.viewportWidth)
-			playerPoly.setPosition(camera.viewportWidth - playerPoly.getVertices()[4],playerPoly.getY());
-		if(playerPoly.getY() < 0)
-			playerPoly.setPosition(playerPoly.getX(),0);
-		if(playerPoly.getY() > camera.viewportHeight - playerPoly.getVertices()[3])
-			playerPoly.setPosition(playerPoly.getX(),camera.viewportHeight - playerPoly.getVertices()[3]);
-
-		drawDebug(debug,playerPoly);
+		System.out.println(bf109poly.getX()+ " "+bf109poly.getY());
+		//System.out.println(enemy.);
+		System.out.println("Origin: "+bf109poly.getOriginX()+" "+bf109poly.getOriginY());
+		for(Iterator<Bullet> itr = bullets.iterator();itr.hasNext();)
+		{
+			Bullet b = itr.next();
+			if(b.offScreen)
+			{
+				b=null;
+				itr.remove();
+			}
+			else
+				b.move();
+		}
+		enemy.move();
+		//drawDebug(debug,playerPoly);
+		drawDebug(debug,bf109poly);
 		batch.setProjectionMatrix(camera.combined);
+
 		batch.begin();
-		batch.draw(p40,playerPoly.getX(),playerPoly.getY(),90,70);
-		//batch.draw(p40,200,20,90,70);
+		enemy.draw(batch);
+		//player.draw(batch);
+		for(Bullet b:bullets)
+		{
+			if(b!=null)
+				b.draw(batch);
+		}
 		batch.end();
 		camera.update();
 	}
@@ -100,6 +113,7 @@ public class Homework extends ApplicationAdapter
 	@Override
 	public void dispose()
 	{
+		Bullet.texture.dispose();
 		batch.dispose();
 		p40.dispose();
 		bf109.dispose();
