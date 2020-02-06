@@ -58,6 +58,14 @@ public class Enemy extends Plane
 		sprite.setPosition(collider.getX(),collider.getY());
 		sprite.draw(batch);
 	}
+	public EnemyTemplate createTemplate()
+	{
+		return new EnemyTemplate(texture,collider,hp,speed,bounds,pointVal,dimensions,position);
+	}
+	public Vector2 getPosition()
+	{
+		return new Vector2(collider.getX(),collider.getY());
+	}
 
 	@Override
 	public void explode()

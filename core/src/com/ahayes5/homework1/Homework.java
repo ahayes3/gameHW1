@@ -29,7 +29,8 @@ public class Homework extends ApplicationAdapter
 	ShapeRenderer debug;
 	Player player;
 	Array<Bullet> bullets;
-	Enemy enemy;
+	EnemyTemplate enemy;
+	Array<Enemy> enemies;
 
 	@Override
 	public void create()
@@ -58,9 +59,12 @@ public class Homework extends ApplicationAdapter
 		bf109poly=new Polygon();
 		bf109poly.setOrigin(0,0);
 		bf109poly.setVertices(new float[]{0,45,40,60,80,45,40,0});
-		enemy = new Enemy(bf109,bf109poly,1,100,
+		enemy = new EnemyTemplate(bf109,bf109poly,1,100,
 				new Vector2(camera.viewportWidth,camera.viewportHeight),100
 				,new Vector2(80,60));
+		enemies=new Array<>();
+		Formation formation = new Formation(7,enemy);
+		enemies.addAll(formation.generateFormation(2));
 	}
 
 	@Override
@@ -73,32 +77,36 @@ public class Homework extends ApplicationAdapter
 		if(temp!=null)
 			bullets.addAll(temp);
 
-		System.out.println(bf109poly.getX()+ " "+bf109poly.getY());
-		//System.out.println(enemy.);
-		System.out.println("Origin: "+bf109poly.getOriginX()+" "+bf109poly.getOriginY());
 		for(Iterator<Bullet> itr = bullets.iterator();itr.hasNext();)
 		{
 			Bullet b = itr.next();
 			if(b.offScreen)
-			{
-				b=null;
 				itr.remove();
-			}
 			else
 				b.move();
 		}
-		enemy.move();
-		//drawDebug(debug,playerPoly);
-		drawDebug(debug,bf109poly);
+		for(Iterator<Enemy> itr = enemies.iterator();itr.hasNext();)
+		{
+			Enemy e = itr.next();
+			if(e.getPosition().y<0)
+				itr.remove();
+			else
+				e.move();
+		}
+		drawDebug(debug,playerPoly);
 		batch.setProjectionMatrix(camera.combined);
 
 		batch.begin();
-		enemy.draw(batch);
-		//player.draw(batch);
+		player.draw(batch);
 		for(Bullet b:bullets)
 		{
 			if(b!=null)
 				b.draw(batch);
+		}
+		for(Enemy e: enemies)
+		{
+			if(e!=null)
+				e.draw(batch);
 		}
 		batch.end();
 		camera.update();
