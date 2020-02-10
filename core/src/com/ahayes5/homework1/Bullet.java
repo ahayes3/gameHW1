@@ -3,8 +3,10 @@ package com.ahayes5.homework1;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class Bullet
 {
@@ -33,6 +35,22 @@ public class Bullet
 			offScreen=true;
 		else
 			collider.translate(direction.x*Gdx.graphics.getDeltaTime(),direction.y*Gdx.graphics.getDeltaTime());
+	}
+	public boolean fromPlayer()
+	{
+		return player;
+	}
+	public Enemy checkCollisions(Array<Enemy> enemies)
+	{
+		for(Enemy e: enemies)
+		{
+			if(Intersector.overlapConvexPolygons(this.collider,e.collider))
+			{
+				System.out.println("HIT");
+				return e;
+			}
+		}
+		return null;
 	}
 	public void draw(SpriteBatch batch)
 	{

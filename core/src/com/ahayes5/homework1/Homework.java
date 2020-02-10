@@ -8,8 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Polygon;
@@ -30,7 +29,12 @@ public class Homework extends ApplicationAdapter
 	Player player;
 	Array<Bullet> bullets;
 	EnemyTemplate enemy;
+	public static ParticleEffect explosion;
 	Array<Enemy> enemies;
+	Array<Enemy> killed;
+	private BitmapFont font;
+	TextureAtlas particleAtlas;
+	public static int score;
 
 	@Override
 	public void create()
@@ -46,15 +50,24 @@ public class Homework extends ApplicationAdapter
 		p40 = new Texture(Gdx.files.internal("p40.png"));
 		bf109 = new Texture(Gdx.files.internal("bf109.png"));
 		propeller = Gdx.audio.newMusic(Gdx.files.internal("propeller.mp3"));
+		particleAtlas= new TextureAtlas();
+		particleAtlas.addRegion("particle",new TextureRegion(new Texture(Gdx.files.internal("particle.png"))));
 
 		playerPoly=new Polygon();
 		playerPoly.setOrigin(0,0);
 		playerPoly.setVertices(new float[]{0,45,45,70,90,45,45,0});
 
+		explosion=new ParticleEffect();
+		explosion.load(Gdx.files.internal("explosion.p"),particleAtlas);
+		explosion.setDuration(1000);
+
 		player = new Player(p40,playerPoly,camera.viewportWidth,camera.viewportHeight);
 		propeller.setLooping(true);
 		propeller.setVolume(.5f);
 		propeller.play();
+
+
+
 
 		bf109poly=new Polygon();
 		bf109poly.setOrigin(0,0);
@@ -65,11 +78,16 @@ public class Homework extends ApplicationAdapter
 		enemies=new Array<>();
 		Formation formation = new Formation(7,enemy);
 		enemies.addAll(formation.generateFormation(2));
+		score=0;
+		killed=new Array<Enemy>();
+
+		font = new BitmapFont();
 	}
 
 	@Override
 	public void render()
 	{
+		killed.clear();
 		Gdx.gl.glClearColor(.1f, .5f, .1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -77,6 +95,11 @@ public class Homework extends ApplicationAdapter
 		if(temp!=null)
 			bullets.addAll(temp);
 
+		if(player.exploded)
+		{
+			bullets.clear();
+			enemies.clear();
+		}
 		for(Iterator<Bullet> itr = bullets.iterator();itr.hasNext();)
 		{
 			Bullet b = itr.next();
@@ -88,12 +111,36 @@ public class Homework extends ApplicationAdapter
 		for(Iterator<Enemy> itr = enemies.iterator();itr.hasNext();)
 		{
 			Enemy e = itr.next();
+			if(e.isGone())
+				itr.remove();
 			if(e.getPosition().y<0)
 				itr.remove();
 			else
 				e.move();
 		}
-		drawDebug(debug,playerPoly);
+		for(Bullet b:bullets)
+		{
+			Enemy e = b.checkCollisions(enemies);
+			if(e!=null)
+			{
+				e.explode();
+				b.offScreen=true;
+			}
+
+			if(player.checkCollision(b))
+			{
+				player.explode();
+			}
+		}
+		for(Enemy e: enemies)
+		{
+			if(player.checkCollision(e))
+			{
+				player.explode();
+				e.explode();
+			}
+		}
+		//drawDebug(debug,playerPoly);
 		batch.setProjectionMatrix(camera.combined);
 
 		batch.begin();
@@ -108,8 +155,13 @@ public class Homework extends ApplicationAdapter
 			if(e!=null)
 				e.draw(batch);
 		}
+		String scoreStr = "Score: "+score;
+		font.draw(batch,scoreStr,20,camera.viewportHeight-20);
+		if(player.exploded)
+			font.draw(batch,"GAME OVER",camera.viewportWidth/2 -40,camera.viewportHeight/2);
 		batch.end();
 		camera.update();
+		enemies.removeAll(killed,true);
 	}
 	void drawDebug(ShapeRenderer sr,Polygon p)
 	{
@@ -121,7 +173,12 @@ public class Homework extends ApplicationAdapter
 	@Override
 	public void dispose()
 	{
+		font.dispose();
 		Bullet.texture.dispose();
+		particleAtlas.dispose();
+		explosion.dispose();
+		Bullet.texture.dispose();
+		propeller.dispose();
 		batch.dispose();
 		p40.dispose();
 		bf109.dispose();
