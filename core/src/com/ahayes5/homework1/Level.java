@@ -21,4 +21,8 @@ public class Level
 		delays.removeIndex(i);
 		return formations.removeIndex(i);
 	}
+	public boolean isOver()
+	{
+		return formations.isEmpty();
+	}
 }

@@ -35,6 +35,7 @@ public class Homework extends ApplicationAdapter
 	TextureAtlas particleAtlas;
 	Array<Level> levels;
 	public static int score;
+	int level;
 
 	@Override
 	public void create()
@@ -84,12 +85,12 @@ public class Homework extends ApplicationAdapter
 
 		font = new BitmapFont();
 
+		level= 1;
 		Level one = new Level();
 		one.addFormation(new Formation(6,1,enemy),3000);
 		one.addFormation(new Formation(6,2,enemy),3000);
 		one.addFormation(new Formation(6,3,enemy),3000);
 		one.addFormation(new Formation(6,4,enemy),3000);
-
 	}
 
 	@Override
