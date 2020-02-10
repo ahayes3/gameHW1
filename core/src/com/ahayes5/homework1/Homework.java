@@ -30,15 +30,16 @@ public class Homework extends ApplicationAdapter
 	Array<Bullet> bullets;
 	EnemyTemplate enemy;
 	public static ParticleEffect explosion;
-	Array<Enemy> enemies;
-	Array<Enemy> killed;
-	private BitmapFont font;
+	Array<Enemy> enemies,killed;
+	BitmapFont font;
 	TextureAtlas particleAtlas;
+	Array<Level> levels;
 	public static int score;
 
 	@Override
 	public void create()
 	{
+		levels = new Array<>();
 		bullets=new Array<Bullet>();
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false,500,800);
@@ -82,6 +83,13 @@ public class Homework extends ApplicationAdapter
 		killed=new Array<Enemy>();
 
 		font = new BitmapFont();
+
+		Level one = new Level();
+		one.addFormation(new Formation(6,1,enemy),3000);
+		one.addFormation(new Formation(6,2,enemy),3000);
+		one.addFormation(new Formation(6,3,enemy),3000);
+		one.addFormation(new Formation(6,4,enemy),3000);
+
 	}
 
 	@Override

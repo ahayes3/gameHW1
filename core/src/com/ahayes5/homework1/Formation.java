@@ -9,7 +9,7 @@ public class Formation
 {
 	//private Array<Enemy> enemies;
 	private int formationType;//1 is waterfall from left, 2 is waterfall from right, 3 is arrow head
-	// 5 is vertical line TODO
+	// 5 is vertical line
 	//4 is horizontal line
 	private float top;
 	private EnemyTemplate enemy;

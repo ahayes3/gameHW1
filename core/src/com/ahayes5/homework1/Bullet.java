@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 
 public class Bullet
 {
@@ -16,6 +17,7 @@ public class Bullet
 	private Vector2 direction;
 	private boolean player;
 	public boolean offScreen;
+	private Timer timer;
 	public static Texture texture = new Texture(Gdx.files.internal("new_bullet_red.png"));
 	public Bullet(float w,Vector2 p,Vector2 d,float mX,float mY,boolean pl)
 	{
@@ -46,7 +48,6 @@ public class Bullet
 		{
 			if(Intersector.overlapConvexPolygons(this.collider,e.collider))
 			{
-				System.out.println("HIT");
 				return e;
 			}
 		}
