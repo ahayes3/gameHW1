@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 
 import java.util.Iterator;
 
@@ -34,8 +35,10 @@ public class Homework extends ApplicationAdapter
 	BitmapFont font;
 	TextureAtlas particleAtlas;
 	Array<Level> levels;
+	Level current;
 	public static int score;
 	int level;
+	long lastWave,time,currentDelay;
 
 	@Override
 	public void create()
@@ -78,8 +81,8 @@ public class Homework extends ApplicationAdapter
 				new Vector2(camera.viewportWidth,camera.viewportHeight),100
 				,new Vector2(80,60));
 		enemies=new Array<>();
-		Formation formation = new Formation(7,enemy);
-		enemies.addAll(formation.generateFormation(2));
+		//Formation formation = new Formation(7,enemy);
+		//enemies.addAll(formation.generateFormation(2));
 		score=0;
 		killed=new Array<Enemy>();
 
@@ -87,15 +90,18 @@ public class Homework extends ApplicationAdapter
 
 		level= 1;
 		Level one = new Level();
-		one.addFormation(new Formation(6,1,enemy),3000);
-		one.addFormation(new Formation(6,2,enemy),3000);
-		one.addFormation(new Formation(6,3,enemy),3000);
-		one.addFormation(new Formation(6,4,enemy),3000);
+		one.addFormation(new Formation(6,1,enemy),5000);
+		one.addFormation(new Formation(6,2,enemy),5000);
+		one.addFormation(new Formation(6,3,enemy),5000);
+		one.addFormation(new Formation(6,4,enemy),5000);
+		levels.add(one);
+		lastWave=0;
 	}
 
 	@Override
 	public void render()
 	{
+		time = System.currentTimeMillis();
 		killed.clear();
 		Gdx.gl.glClearColor(.1f, .5f, .1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -103,6 +109,22 @@ public class Homework extends ApplicationAdapter
 		Array<Bullet> temp= player.move();
 		if(temp!=null)
 			bullets.addAll(temp);
+
+		if(current == null && !levels.isEmpty())
+			current = levels.removeIndex(0);
+
+		if(enemies.isEmpty() && current!=null && current.isOver())
+		{
+			level++;
+			current = null;
+		}
+
+		if(current !=null && time - lastWave > currentDelay  && !current.isOver())
+		{
+			currentDelay = current.getDelay(0);
+			enemies.addAll(current.removeFormation(0).generateFormation());
+			lastWave=time;
+		}
 
 		if(player.exploded)
 		{
@@ -165,6 +187,7 @@ public class Homework extends ApplicationAdapter
 				e.draw(batch);
 		}
 		String scoreStr = "Score: "+score;
+
 		font.draw(batch,scoreStr,20,camera.viewportHeight-20);
 		if(player.exploded)
 			font.draw(batch,"GAME OVER",camera.viewportWidth/2 -40,camera.viewportHeight/2);

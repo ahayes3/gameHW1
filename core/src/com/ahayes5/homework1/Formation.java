@@ -20,6 +20,7 @@ public class Formation
 		planeNum = p;
 		enemy = e;
 		top = Homework.camera.viewportHeight + enemy.collider.getBoundingRectangle().height;
+		formationType = -1;
 	}
 
 	public Formation(int p, int t, EnemyTemplate e)
@@ -133,6 +134,8 @@ public class Formation
 	}
 	public Array<Enemy> generateFormation()
 	{
+		if(formationType!=-1)
+			return generateFormation(formationType);
 		return generateFormation(ThreadLocalRandom.current().nextInt(1, 4 + 1));
 	}
 

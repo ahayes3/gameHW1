@@ -68,7 +68,6 @@ public class Enemy extends Plane
 		}
 		else
 		{
-			System.out.println("Drawing");
 			myExplosion.draw(batch,Gdx.graphics.getDeltaTime());
 		}
 		if(myExplosion.isComplete())

@@ -25,4 +25,8 @@ public class Level
 	{
 		return formations.isEmpty();
 	}
+	public long getDelay(int i)
+	{
+		return delays.get(i);
+	}
 }
